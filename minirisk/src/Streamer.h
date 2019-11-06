@@ -137,18 +137,15 @@ inline std::ostream& operator<<(std::ostream& os, const Date& d)
 
 inline my_ofstream& operator<<(my_ofstream& os, const Date& d)
 {
-    os << d.to_string(false);
+    os << d.get_serial();
     return os;
 }
 
 inline my_ifstream& operator>>(my_ifstream& is, Date& v)
 {
-    string tmp;
-    is >> tmp;
-    unsigned y = std::atoi(tmp.substr(0, 4).c_str());
-    unsigned m = std::atoi(tmp.substr(4, 2).c_str());
-    unsigned d = std::atoi(tmp.substr(6, 2).c_str());
-    v.init(y, m, d);
+    unsigned temp;
+    is >> temp;
+    v.set_lomo_serial(temp);
     return is;
 }
 
