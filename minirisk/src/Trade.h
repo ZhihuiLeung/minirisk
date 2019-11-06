@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+#include <sstream>
 #include "ITrade.h"
 #include "Streamer.h"
 
@@ -40,15 +42,32 @@ protected:
 
     virtual void save(my_ofstream& os) const
     {
-        os << id()
-            << quantity();
+        union { double d; uint64_t u; } tmp;
+        std::stringstream ss;
+        std::string temp_s;
+        
+        tmp.d = quantity();
+        ss << std::hex << tmp.u;
+        ss >> temp_s;
+
+        os << id() << temp_s;
         static_cast<const T*>(this)->save_details(os);
     }
 
     virtual void load(my_ifstream& is)
     {
         // read everything but id
-        is >> m_quantity;
+        union { double d; uint64_t u; } tmp;
+        std::string temp_s;
+        std::stringstream ss;
+
+        is >> temp_s;
+
+        ss << std::hex << temp_s;
+        ss >> tmp.u;
+
+        m_quantity = tmp.d;
+
         static_cast<T*>(this)->load_details(is);
     }
 
