@@ -31,6 +31,7 @@ void run(const string& portfolio_file, const string& risk_factors_file)
     // Price all products. Market objects are automatically constructed on demand,
     // fetching data as needed from the market data server.
     {
+
         auto prices = compute_prices(pricers, mkt);
         print_price_vector("PV", prices);
     }
