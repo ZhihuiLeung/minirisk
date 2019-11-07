@@ -23,6 +23,28 @@ const ptr_disc_curve_t Market::get_discount_curve(const string& name)
 
 std::map<string, double> Market::from_mds(const string& objtype, const string& name)
 {
+    if(m_mds == NULL)
+    {
+        std::map<string, double> result_map;
+        Market::vec_risk_factor_t temp;
+
+        if(objtype == "yield curve")
+        {
+            auto pos = name.find('.', 0);
+            temp = get_risk_factors(name.substr(0, pos)+".(([1-9][0-9]*[DWY])|((1[0-2]|[1-9])[M]))."+name.substr(pos+1,name.size()));
+
+            for(auto iter=temp.cbegin(); iter!=temp.cend(); iter++)
+            {
+                result_map[iter->first] = iter->second;
+            }
+        } else if(objtype == "fx spot")
+        {
+            temp = get_risk_factors(name);
+            result_map[(temp.cbegin())->first] = (temp.cbegin())->second;
+        }
+        return result_map;
+    }
+    
     std::map<string, double> result_map = m_mds->get(objtype, name);
 
     for(auto iter = result_map.cbegin(); iter != result_map.cend(); iter++)
@@ -34,14 +56,7 @@ std::map<string, double> Market::from_mds(const string& objtype, const string& n
         }
     }
     
-    return result_map;
-    // auto ins = m_risk_factors.emplace(name, std::numeric_limits<double>::quiet_NaN());
-    // if (ins.second) { // just inserted, need to be populated
-    //     MYASSERT(m_mds, "Cannot fetch " << objtype << " " << name << " because the market data server has been disconnnected");
-    //     // ins.first->second = m_mds->get(name);
-    //     ins.first->second = 0;
-    // }
-    // return ins.first->second;
+    return result_map; 
 }
 
 const std::map<string, double> Market::get_yield(const string& ccyname)

@@ -24,7 +24,7 @@ double PricerPayment::price(Market& mkt) const
         std::map<string, double> temp_map = mkt.get_fx_spot(m_fx_ccy);
         df *= ((temp_map.cbegin())->second);
     }
-
+    // std::cout << m_amt * df << std::endl;
     return m_amt * df;
 }
 

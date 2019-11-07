@@ -3,7 +3,7 @@
 #include "TradePayment.h"
 
 #include <numeric>
-
+#include <set>
 namespace minirisk {
 
 void print_portfolio(const portfolio_t& portfolio)
@@ -32,14 +32,65 @@ double portfolio_total(const portfolio_values_t& values)
     return std::accumulate(values.begin(), values.end(), 0.0);
 }
 
-std::vector<std::pair<string, portfolio_values_t>> compute_pv01(const std::vector<ppricer_t>& pricers, const Market& mkt)
+std::vector<std::pair<string, portfolio_values_t>> compute_parallel_pv01(const std::vector<ppricer_t>& pricers, const Market& mkt)
+{
+    std::vector<std::pair<string, portfolio_values_t>> pv01;  // PV01 per trade
+    std::set<string> my_set;
+
+    const double bump_size = 0.01 / 100;
+    // bucketed 
+    // filter risk factors related to IR
+    auto base = mkt.get_risk_factors(ir_rate_prefix + "(([1-9][0-9]*[DWY])|((1[0-2]|[1-9])[M])).*");
+
+    // compute prices for perturbated markets and aggregate results
+    pv01.reserve(base.size());
+
+    for (const auto& d : base) {
+        string temp = d.first;
+        my_set.insert(temp.substr(temp.size()-3, temp.size()));
+    }
+    for(auto iter=my_set.begin(); iter!=my_set.end();iter++)
+    {
+        std::vector<double> pv_up, pv_dn;
+        double dr = 2.0 * bump_size;
+
+        // Make a local copy of the Market object, because we will modify it applying bumps
+        // Note that the actual market objects are shared, as they are referred to via pointers
+        Market tmpmkt_up(mkt);
+        Market tmpmkt_down(mkt);
+
+        base = mkt.get_risk_factors(ir_rate_prefix + "(([1-9][0-9]*[DWY])|((1[0-2]|[1-9])[M]))."+(*iter));
+        
+        pv01.push_back(std::make_pair("parallel " + ir_rate_prefix+(*iter), std::vector<double>(pricers.size())));
+
+        for (const auto& d : base) {
+            std::vector<std::pair<string, double>> bumped(1, d);
+            // std::cout << d.first << std::endl;
+            bumped[0].second = d.second - bump_size;
+            tmpmkt_down.set_risk_factors(bumped);
+            
+            bumped[0].second = d.second + bump_size; // bump up
+            tmpmkt_up.set_risk_factors(bumped);
+        }
+
+        pv_dn = compute_prices(pricers, tmpmkt_down);
+        pv_up = compute_prices(pricers, tmpmkt_up);
+
+        std::transform(pv_up.begin(), pv_up.end(), pv_dn.begin(), pv01.back().second.begin()
+                , [dr](double hi, double lo) -> double { return (hi - lo) / dr; });
+    }
+    
+    return pv01;
+}
+
+std::vector<std::pair<string, portfolio_values_t>> compute_bucketed_pv01(const std::vector<ppricer_t>& pricers, const Market& mkt)
 {
     std::vector<std::pair<string, portfolio_values_t>> pv01;  // PV01 per trade
 
     const double bump_size = 0.01 / 100;
-
+    // bucketed 
     // filter risk factors related to IR
-    auto base = mkt.get_risk_factors(ir_rate_prefix + "[A-Z]{3}");
+    auto base = mkt.get_risk_factors(ir_rate_prefix + "(([1-9][0-9]*[DWY])|((1[0-2]|[1-9])[M])).*");
 
     // Make a local copy of the Market object, because we will modify it applying bumps
     // Note that the actual market objects are shared, as they are referred to via pointers
@@ -47,10 +98,11 @@ std::vector<std::pair<string, portfolio_values_t>> compute_pv01(const std::vecto
 
     // compute prices for perturbated markets and aggregate results
     pv01.reserve(base.size());
+
     for (const auto& d : base) {
         std::vector<double> pv_up, pv_dn;
         std::vector<std::pair<string, double>> bumped(1, d);
-        pv01.push_back(std::make_pair(d.first, std::vector<double>(pricers.size())));
+        pv01.push_back(std::make_pair("bucketed " + d.first, std::vector<double>(pricers.size())));
 
         // bump down and price
         bumped[0].second = d.second - bump_size;
@@ -62,7 +114,6 @@ std::vector<std::pair<string, portfolio_values_t>> compute_pv01(const std::vecto
         tmpmkt.set_risk_factors(bumped);
         pv_up = compute_prices(pricers, tmpmkt);
 
-
         // restore original market state for next iteration
         // (more efficient than creating a new copy of the market at every iteration)
         bumped[0].second = d.second;
@@ -73,10 +124,18 @@ std::vector<std::pair<string, portfolio_values_t>> compute_pv01(const std::vecto
         std::transform(pv_up.begin(), pv_up.end(), pv_dn.begin(), pv01.back().second.begin()
             , [dr](double hi, double lo) -> double { return (hi - lo) / dr; });
     }
-
     return pv01;
 }
 
+std::vector<std::pair<string, portfolio_values_t>> compute_pv01(const std::vector<ppricer_t>& pricers, const Market& mkt)
+{
+    auto bucketed_pv01 = compute_bucketed_pv01(pricers, mkt);
+    auto parallel_pv01 = compute_parallel_pv01(pricers, mkt);
+
+    std::vector<std::pair<string, portfolio_values_t>> pv01_result(bucketed_pv01.size()+parallel_pv01.size());
+    std::merge(bucketed_pv01.begin(), bucketed_pv01.end(), parallel_pv01.begin(), parallel_pv01.end(), pv01_result.begin());
+    return pv01_result;
+}
 
 ptrade_t load_trade(my_ifstream& is)
 {
