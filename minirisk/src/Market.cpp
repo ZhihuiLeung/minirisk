@@ -21,23 +21,36 @@ const ptr_disc_curve_t Market::get_discount_curve(const string& name)
     return get_curve<ICurveDiscount, CurveDiscount>(name);
 }
 
-double Market::from_mds(const string& objtype, const string& name)
+std::map<string, double> Market::from_mds(const string& objtype, const string& name)
 {
-    auto ins = m_risk_factors.emplace(name, std::numeric_limits<double>::quiet_NaN());
-    if (ins.second) { // just inserted, need to be populated
-        MYASSERT(m_mds, "Cannot fetch " << objtype << " " << name << " because the market data server has been disconnnected");
-        ins.first->second = m_mds->get(name);
+    std::map<string, double> result_map = m_mds->get(objtype, name);
+
+    for(auto iter = result_map.cbegin(); iter != result_map.cend(); iter++)
+    {
+        auto ins = m_risk_factors.emplace(iter->first, std::numeric_limits<double>::quiet_NaN());
+        if (ins.second) { // just inserted, need to be populated
+            MYASSERT(m_mds, "Cannot fetch " << objtype << " " << iter->first << " because the market data server has been disconnnected");
+            ins.first->second = iter->second;
+        }
     }
-    return ins.first->second;
+    
+    return result_map;
+    // auto ins = m_risk_factors.emplace(name, std::numeric_limits<double>::quiet_NaN());
+    // if (ins.second) { // just inserted, need to be populated
+    //     MYASSERT(m_mds, "Cannot fetch " << objtype << " " << name << " because the market data server has been disconnnected");
+    //     // ins.first->second = m_mds->get(name);
+    //     ins.first->second = 0;
+    // }
+    // return ins.first->second;
 }
 
-const double Market::get_yield(const string& ccyname)
+const std::map<string, double> Market::get_yield(const string& ccyname)
 {
     string name(ir_rate_prefix + ccyname);
     return from_mds("yield curve", name);
 };
 
-const double Market::get_fx_spot(const string& name)
+const std::map<string, double> Market::get_fx_spot(const string& name)
 {
     return from_mds("fx spot", mds_spot_name(name));
 }

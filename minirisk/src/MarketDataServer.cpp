@@ -3,6 +3,7 @@
 #include "Streamer.h"
 
 #include <limits>
+#include <vector>
 
 namespace minirisk {
 
@@ -29,11 +30,33 @@ MarketDataServer::MarketDataServer(const string& filename)
     } while (is);
 }
 
-double MarketDataServer::get(const string& name) const
+std::map<string, double> MarketDataServer::get(const string& objtype, const string& name) const
 {
-    auto iter = m_data.find(name);
-    MYASSERT(iter != m_data.end(), "Market data not found: " << name);
-    return iter->second;
+    std::map<string, double> result_map;
+    
+    if(objtype == "yield curve")
+    {
+        auto pos = name.find('.', 0);
+
+        auto matched_name_vec = match(name.substr(0, pos)+".(([1-9][0-9]*[DWY])|((1[0-2]|[1-9])[M]))."+name.substr(pos+1,name.size()));
+
+        for(auto my_iter = matched_name_vec.cbegin(); my_iter != matched_name_vec.cend(); my_iter++)
+        {
+            auto iter = m_data.find(*my_iter);
+            MYASSERT(iter != m_data.end(), "Market data not found: " << *my_iter);
+            auto ins = result_map.emplace(*my_iter, iter->second);
+            MYASSERT(ins.second, "Duplicated risk factor: " << *my_iter);
+        }
+    } 
+    else if(objtype == "fx spot")
+    {
+        auto iter = m_data.find(name);
+        MYASSERT(iter != m_data.end(), "Market data not found: " << name);
+        auto ins = result_map.emplace(name, iter->second);
+        MYASSERT(ins.second, "Duplicated risk factor: " << name);
+    }    
+
+    return result_map;
 }
 
 std::pair<double, bool> MarketDataServer::lookup(const string& name) const
@@ -47,7 +70,17 @@ std::pair<double, bool> MarketDataServer::lookup(const string& name) const
 std::vector<std::string> MarketDataServer::match(const std::string& expr) const
 {
     std::regex r(expr);
-    NOT_IMPLEMENTED;
+    std::vector<std::string> matched_name_vec;
+
+    for(auto iter = m_data.cbegin(); iter != m_data.cend(); iter++)
+    {
+        if(std::regex_match(iter->first, r))
+        {
+            matched_name_vec.push_back(iter->first);
+        }
+    }
+
+    return matched_name_vec;
 }
 
 } // namespace minirisk

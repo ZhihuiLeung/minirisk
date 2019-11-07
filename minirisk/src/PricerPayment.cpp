@@ -1,7 +1,7 @@
 #include "PricerPayment.h"
 #include "TradePayment.h"
 #include "CurveDiscount.h"
-
+#include <map>
 namespace minirisk {
 
 PricerPayment::PricerPayment(const TradePayment& trd)
@@ -18,8 +18,12 @@ double PricerPayment::price(Market& mkt) const
     double df = disc->df(m_dt); // this throws an exception if m_dt<today
 
     // This PV is expressed in m_ccy. It must be converted in USD.
+
     if (!m_fx_ccy.empty())
-        df *= mkt.get_fx_spot(m_fx_ccy);
+    {
+        std::map<string, double> temp_map = mkt.get_fx_spot(m_fx_ccy);
+        df *= ((temp_map.cbegin())->second);
+    }
 
     return m_amt * df;
 }
