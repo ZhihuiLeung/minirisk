@@ -71,7 +71,6 @@ std::vector<std::string> MarketDataServer::match(const std::string& expr) const
 {
     std::regex r(expr);
     std::vector<std::string> matched_name_vec;
-
     for(auto iter = m_data.cbegin(); iter != m_data.cend(); iter++)
     {
         if(std::regex_match(iter->first, r))

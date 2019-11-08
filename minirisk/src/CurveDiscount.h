@@ -16,7 +16,7 @@ struct CurveDiscount : ICurveDiscount
     CurveDiscount(Market *mkt, const Date& today, const string& curve_name);
 
     // compute the discount factor
-    double df(const Date& t) const;
+    std::pair<double, unsigned> df(const Date& t) const;
 
     virtual Date today() const { return m_today; }
 

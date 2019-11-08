@@ -65,13 +65,16 @@ CurveDiscount::CurveDiscount(Market *mkt, const Date& today, const string& curve
     
 }
 
-double  CurveDiscount::df(const Date& t) const
+std::pair<double, unsigned> CurveDiscount::df(const Date& t) const
 {
-    MYASSERT((!(t < m_today)), "cannot get discount factor for date in the past: " << t);
+    if(t < m_today) return std::make_pair(t.get_serial()-m_today.get_serial(), 1);
+    
     double dt = time_frac(m_today, t);
 
     unsigned id = unsigned(std::lower_bound(tenor_rate_vec.begin(), tenor_rate_vec.end(), std::make_pair(dt, 0), judge) - tenor_rate_vec.begin());
-    
+
+    if(id == tenor_rate_vec.size()) return std::make_pair(tenor_rate_vec.back().first * 365, 2);
+
     double t_i = tenor_rate_vec[id].first;
     double t_i_add_one = tenor_rate_vec[id+1].first;
     
@@ -79,11 +82,11 @@ double  CurveDiscount::df(const Date& t) const
 
     if(remain_tenor == 0)
     {
-        return std::exp(rate_mul_tenor_vec[id]);
+        return std::make_pair(std::exp(rate_mul_tenor_vec[id]), 0);
     } else {
         double forward_rate = (-rate_mul_tenor_vec[id+1] + rate_mul_tenor_vec[id]) / (t_i_add_one - t_i);
         double forward_rate_mul_tenor_diff = - forward_rate * remain_tenor;
-        return std::exp(rate_mul_tenor_vec[id] + forward_rate_mul_tenor_diff);
+        return std::make_pair(std::exp(rate_mul_tenor_vec[id] + forward_rate_mul_tenor_diff), 0);
     }
 }
 

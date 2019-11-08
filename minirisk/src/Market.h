@@ -28,7 +28,10 @@ public:
         , m_mds(mds)
     {
     }
-
+    Date return_today()
+    {
+        return m_today;
+    }
     virtual Date today() const { return m_today; }
 
     // get an object of type ICurveDisocunt

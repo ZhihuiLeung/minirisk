@@ -29,7 +29,7 @@ typedef std::shared_ptr<const ICurveDiscount> ptr_disc_curve_t;
 struct ICurveDiscount : ICurve
 {
     // compute the discount factor for date t
-    virtual double df(const Date& t) const = 0;
+    virtual std::pair<double, unsigned> df(const Date& t) const = 0;
 };
 
 struct ICurveFXForward : ICurve
