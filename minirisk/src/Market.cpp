@@ -2,6 +2,7 @@
 #include "CurveDiscount.h"
 #include "CurveFXSpot.h"
 
+#include<map>
 #include <vector>
 
 namespace minirisk {
@@ -97,8 +98,12 @@ const std::map<string, double> Market::generate_different_fx_spot(const string& 
             }
         }
     } else {
+
         auto temp = m_mds->get("fx spot", name);
         double cur_fx = temp[name];
+
+        // auto base_ccy_iter = m_mds->("fx spot", fx_spot_prefix+m_baseccy);
+        // double base_ccy_fx = base_ccy_iter[fx_spot_prefix+m_baseccy];
 
         auto ins = m_risk_factors.emplace(name, std::numeric_limits<double>::quiet_NaN());
         if (ins.second) { // just inserted, need to be populated
@@ -123,7 +128,7 @@ const std::map<string, double> Market::generate_different_fx_spot(const string& 
 }
 const std::map<string, double> Market::get_fx_spot(const string& name)
 {
-    return generate_different_fx_spot(mds_spot_name(name));
+    return generate_different_fx_spot(name);
 }
 
 void Market::set_risk_factors(const vec_risk_factor_t& risk_factors)
@@ -145,5 +150,8 @@ Market::vec_risk_factor_t Market::get_risk_factors(const std::string& expr) cons
             result.push_back(d);
     return result;
 }
-
+const std::string Market::get_baseccy()
+{
+    return m_baseccy;
+}
 } // namespace minirisk

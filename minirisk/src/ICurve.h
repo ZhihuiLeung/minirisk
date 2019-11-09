@@ -44,7 +44,7 @@ struct ICurveFXSpot : ICurve
 {
     // return the FX spot price of currency ccy1 deniminated in ccy2 for delivery at time t
     // ignore the fact that the FX spot is a t+2 forward price itself, and assume it is the istantaneous exchange rate
-    virtual std::map<std::string, double> spot() const = 0;
+    virtual double get_spot(const std::string& name) const = 0;
 };
 
 } // namespace minirisk

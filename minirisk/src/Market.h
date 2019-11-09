@@ -23,9 +23,10 @@ public:
     typedef std::pair<string, double> risk_factor_t;
     typedef std::vector<std::pair<string, double>> vec_risk_factor_t;
 
-    Market(const std::shared_ptr<const MarketDataServer>& mds, const Date& today)
+    Market(const std::shared_ptr<const MarketDataServer>& mds, const Date& today, const string& baseccy)
         : m_today(today)
         , m_mds(mds)
+        , m_baseccy(baseccy)
     {
     }
     Date return_today()
@@ -45,6 +46,8 @@ public:
     const std::map<string, double> generate_different_fx_spot(const string& name);
     // after the market has been disconnected, it is no more possible to fetch
     // new data points from the market data server
+
+    const std::string get_baseccy();
     void disconnect()
     {
         m_mds.reset();
@@ -71,6 +74,8 @@ private:
 
     // raw risk factors
     std::map<string, double> m_risk_factors;
+
+    std::string m_baseccy;
 };
 
 } // namespace minirisk

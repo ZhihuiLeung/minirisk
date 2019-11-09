@@ -11,11 +11,11 @@ void print_portfolio(const portfolio_t& portfolio)
     std::for_each(portfolio.begin(), portfolio.end(), [](auto& pt){ pt->print(std::cout); });
 }
 
-std::vector<ppricer_t> get_pricers(const portfolio_t& portfolio)
+std::vector<ppricer_t> get_pricers(const portfolio_t& portfolio, const std::string& baseccy)
 {
     std::vector<ppricer_t> pricers(portfolio.size());
     std::transform( portfolio.begin(), portfolio.end(), pricers.begin()
-                  , [](auto &pt) -> ppricer_t { return pt->pricer(); } );
+                  , [baseccy](auto &pt) -> ppricer_t { return pt->pricer(baseccy); } );
     return pricers;
 }
 
