@@ -28,15 +28,17 @@ std::pair<double,string> PricerPayment::price(Market& mkt) const
 
     if(df>1)
     {
-        if(df_result.second == 1) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available before anchor date "+my_date_transorm(m_dt.to_string())+", requested "+my_date_transorm(Date(mkt.return_today().get_serial()+unsigned(df)).to_string()));
+        if(df_result.second == 1) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available before anchor date "+my_date_transorm(mkt.return_today().to_string())+", requested "+my_date_transorm(Date(mkt.return_today().get_serial()+unsigned(df)).to_string()));
         else if(df_result.second == 2) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available beyond last tenor date "+my_date_transorm(Date(mkt.return_today().get_serial()+unsigned(df)).to_string())+", requested "+my_date_transorm(m_dt.to_string()));
     }
     
     // This PV is expressed in m_ccy. It must be converted in USD.
     if (!m_fx_ccy.empty())
     {
+        // FX.SPOT.EUR.USD
         std::map<string, double> temp_map = mkt.get_fx_spot(m_fx_ccy);
-        df *= ((temp_map.cbegin())->second);
+        auto temp = temp_map.find("FX.SPOT."+m_fx_ccy.substr(m_fx_ccy.length()-3, 3));
+        df *= (temp->second);
     }
     // std::cout << m_amt * df << std::endl;
     return std::make_pair(m_amt * df, "");

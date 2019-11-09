@@ -7,6 +7,13 @@
 
 namespace minirisk {
 
+
+std::string get_fx_name_two(std::string name)
+{
+    auto pos = name.rfind('.');
+    return name.substr(pos+1, name.size());
+}
+
 // transforms FX.SPOT.EUR.USD into FX.SPOT.EUR
 string mds_spot_name(const string& name)
 {
@@ -24,7 +31,7 @@ MarketDataServer::MarketDataServer(const string& filename)
         string name;
         double value;
         is >> name >> value;
-        //std::cout << name << " " << value << "\n";
+        // std::cout << name << " " << value << "\n";
         auto ins = m_data.emplace(name, value);
         MYASSERT(ins.second, "Duplicated risk factor: " << name);
     } while (is);
@@ -50,6 +57,25 @@ std::map<string, double> MarketDataServer::get(const string& objtype, const stri
     } 
     else if(objtype == "fx spot")
     {
+        // auto iter = m_data.find(name);
+        // double cur_fx = iter->second;
+
+        // auto temp_name_vec = match("FX.SPOT.*");
+
+        // for(auto temp_name=temp_name_vec.cbegin(); temp_name!=temp_name_vec.cend(); temp_name++)
+        // {
+        //     auto iter = m_data.find(*temp_name);
+        //     MYASSERT(iter != m_data.end(), "Market data not found: " << name);
+
+        //     if(iter->first != name)
+        //     {
+        //         auto ins = result_map.emplace(iter->first, cur_fx / iter->second);
+        //         MYASSERT(ins.second, "Duplicated risk factor: " << name);
+        //     } else {
+        //         auto ins = result_map.emplace(iter->first.substr(0, iter->first.size()-3)+"USD", cur_fx);
+        //         MYASSERT(ins.second, "Duplicated risk factor: " << name);
+        //     }
+        // }
         auto iter = m_data.find(name);
         MYASSERT(iter != m_data.end(), "Market data not found: " << name);
         auto ins = result_map.emplace(name, iter->second);
