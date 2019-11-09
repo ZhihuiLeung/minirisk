@@ -19,7 +19,7 @@ string my_date_transorm(string date_str)
     
     return std::to_string(std::stoi(date_str.substr(0, index_one))) + '-' + std::to_string(std::stoi(date_str.substr(index_one+1,index_two))) + '-' + date_str.substr(index_two+1,date_str.size());
 }
-std::pair<double,string> PricerPayment::price(Market& mkt) const
+std::pair<double,string> PricerPayment::price(Market& mkt, const FixingDataServer& fds) const
 {
     ptr_disc_curve_t disc = mkt.get_discount_curve(m_ir_curve);
 
@@ -28,8 +28,8 @@ std::pair<double,string> PricerPayment::price(Market& mkt) const
 
     if(df>1)
     {
-        if(df_result.second == 1) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available before anchor date "+my_date_transorm(mkt.return_today().to_string())+", requested "+my_date_transorm(Date(mkt.return_today().get_serial()+unsigned(df)).to_string()));
-        else if(df_result.second == 2) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available beyond last tenor date "+my_date_transorm(Date(mkt.return_today().get_serial()+unsigned(df)).to_string())+", requested "+my_date_transorm(m_dt.to_string()));
+        if(df_result.second == 1) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available before anchor date "+my_date_transorm(mkt.get_today().to_string())+", requested "+my_date_transorm(Date(mkt.get_today().get_serial()+unsigned(df)).to_string()));
+        else if(df_result.second == 2) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+" DF not available beyond last tenor date "+my_date_transorm(Date(mkt.get_today().get_serial()+unsigned(df)).to_string())+", requested "+my_date_transorm(m_dt.to_string()));
     }
     
     // This PV is expressed in m_ccy. It must be converted in USD.

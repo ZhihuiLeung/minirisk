@@ -4,6 +4,8 @@
 #include "IObject.h"
 #include "ICurve.h"
 #include "MarketDataServer.h"
+#include "FixingDataServer.h"
+
 #include <vector>
 #include <regex>
 
@@ -23,16 +25,14 @@ public:
     typedef std::pair<string, double> risk_factor_t;
     typedef std::vector<std::pair<string, double>> vec_risk_factor_t;
 
-    Market(const std::shared_ptr<const MarketDataServer>& mds, const Date& today, const string& baseccy)
+    Market(const std::shared_ptr<const MarketDataServer>& mds, const Date& today, const string& baseccy, const FixingDataServer& fds)
         : m_today(today)
         , m_mds(mds)
         , m_baseccy(baseccy)
+        , m_fds(fds)
     {
     }
-    Date return_today()
-    {
-        return m_today;
-    }
+    Date get_today(){ return m_today;}
     virtual Date today() const { return m_today; }
 
     // get an object of type ICurveDisocunt
@@ -50,6 +50,7 @@ public:
     // new data points from the market data server
 
     const std::string get_baseccy();
+
     void disconnect()
     {
         m_mds.reset();
@@ -67,10 +68,11 @@ public:
     // destroy all existing objects and modify a selected number of data points
     void set_risk_factors(const vec_risk_factor_t& risk_factors);
 
+    FixingDataServer get_fds() {return m_fds;};
+
 private:
     Date m_today;
     std::shared_ptr<const MarketDataServer> m_mds;
-
     // market curves
     std::map<string, ptr_curve_t> m_curves;
 
@@ -78,6 +80,8 @@ private:
     std::map<string, double> m_risk_factors;
 
     std::string m_baseccy;
+
+    FixingDataServer m_fds;
 };
 
 } // namespace minirisk

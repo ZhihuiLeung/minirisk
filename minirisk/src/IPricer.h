@@ -9,7 +9,8 @@ namespace minirisk {
 
 struct IPricer : IObject
 {
-    virtual std::pair<double, string> price(Market& m) const = 0;
+    // virtual std::pair<double, string> price(Market& m) const { return price(m, nullptr); }
+    virtual std::pair<double, string> price(Market& m, const FixingDataServer& fds) const = 0;
 };
 
 

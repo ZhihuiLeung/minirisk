@@ -57,25 +57,6 @@ std::map<string, double> MarketDataServer::get(const string& objtype, const stri
     } 
     else if(objtype == "fx spot")
     {
-        // auto iter = m_data.find(name);
-        // double cur_fx = iter->second;
-
-        // auto temp_name_vec = match("FX.SPOT.*");
-
-        // for(auto temp_name=temp_name_vec.cbegin(); temp_name!=temp_name_vec.cend(); temp_name++)
-        // {
-        //     auto iter = m_data.find(*temp_name);
-        //     MYASSERT(iter != m_data.end(), "Market data not found: " << name);
-
-        //     if(iter->first != name)
-        //     {
-        //         auto ins = result_map.emplace(iter->first, cur_fx / iter->second);
-        //         MYASSERT(ins.second, "Duplicated risk factor: " << name);
-        //     } else {
-        //         auto ins = result_map.emplace(iter->first.substr(0, iter->first.size()-3)+"USD", cur_fx);
-        //         MYASSERT(ins.second, "Duplicated risk factor: " << name);
-        //     }
-        // }
         auto iter = m_data.find(name);
         MYASSERT(iter != m_data.end(), "Market data not found: " << name);
         auto ins = result_map.emplace(name, iter->second);

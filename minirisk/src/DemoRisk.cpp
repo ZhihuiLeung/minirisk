@@ -6,7 +6,7 @@
 
 using namespace::minirisk;
 
-void run(const string& portfolio_file, const string& risk_factors_file, const string& baseccy)
+void run(const string& portfolio_file, const string& risk_factors_file, const string& baseccy, const string& fixing_file_path)
 {
     // load the portfolio from file
     portfolio_t portfolio = load_portfolio(portfolio_file);
@@ -23,10 +23,11 @@ void run(const string& portfolio_file, const string& risk_factors_file, const st
 
     // initialize market data server
     std::shared_ptr<const MarketDataServer> mds(new MarketDataServer(risk_factors_file));
-
+    FixingDataServer fds(fixing_file_path);
+    
     // Init market object
     Date today(2017,8,5);
-    Market mkt(mds, today, baseccy);
+    Market mkt(mds, today, baseccy, fds);
 
     // Price all products. Market objects are automatically constructed on demand,
     // fetching data as needed from the market data server.
@@ -73,6 +74,7 @@ int main(int argc, const char **argv)
     // parse command line arguments
     string portfolio, riskfactors;
     string baseccy = "USD";
+    string fixing_file_path = "";
     if (argc % 2 == 0)
         usage();
     for (int i = 1; i < argc; i += 2) {
@@ -84,6 +86,8 @@ int main(int argc, const char **argv)
             riskfactors = value;
         else if (key == "-b")
 			baseccy = value;
+        else if (key == "-x")
+            fixing_file_path = value;
         else
             usage();
     }
@@ -91,7 +95,8 @@ int main(int argc, const char **argv)
         usage();
 
     try {
-        run(portfolio, riskfactors, baseccy);
+        fixing_file_path = "./data/" + fixing_file_path;
+        run(portfolio, riskfactors, baseccy, fixing_file_path);
         return 0;  // report success to the caller
     }
     catch (const std::exception& e)

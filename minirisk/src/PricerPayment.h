@@ -9,7 +9,7 @@ struct PricerPayment : IPricer
 {
     PricerPayment(const TradePayment& trd, const std::string& baseccy);
 
-    virtual std::pair<double,string> price(Market& m) const;
+    virtual std::pair<double,string> price(Market& m, const FixingDataServer& fds) const;
 
 private:
     double m_amt;
