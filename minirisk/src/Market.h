@@ -38,6 +38,8 @@ public:
     // get an object of type ICurveDisocunt
     const ptr_disc_curve_t get_discount_curve(const string& name);
     const ptr_fx_spot_curve_t get_fx_spot_curve(const string& name);
+    const ptr_fx_forward_curve_t get_fx_fwd_curve(const string& name);
+
     // yield rate for currency name
     const std::map<string, double> get_yield(const string& name);
 

@@ -1,6 +1,8 @@
 #include "Market.h"
+
 #include "CurveDiscount.h"
 #include "CurveFXSpot.h"
+#include "CurveFXForward.h"
 
 #include<map>
 #include <vector>
@@ -12,6 +14,7 @@ std::string get_fx_name(std::string name)
     auto pos = name.rfind('.');
     return name.substr(pos+1, name.size());
 }
+
 template <typename I, typename T>
 std::shared_ptr<const I> Market::get_curve(const string& name)
 {
@@ -30,6 +33,10 @@ const ptr_disc_curve_t Market::get_discount_curve(const string& name)
 
 const ptr_fx_spot_curve_t Market::get_fx_spot_curve(const string& name) {
     return get_curve<ICurveFXSpot, CurveFXSpot>(name);
+}
+
+const ptr_fx_forward_curve_t Market::get_fx_fwd_curve(const string& name) {
+    return get_curve<ICurveFXForward, CurveFXForward>(name);
 }
 
 std::map<string, double> Market::from_mds(const string& objtype, const string& name)
@@ -101,9 +108,6 @@ const std::map<string, double> Market::generate_different_fx_spot(const string& 
 
         auto temp = m_mds->get("fx spot", name);
         double cur_fx = temp[name];
-
-        // auto base_ccy_iter = m_mds->("fx spot", fx_spot_prefix+m_baseccy);
-        // double base_ccy_fx = base_ccy_iter[fx_spot_prefix+m_baseccy];
 
         auto ins = m_risk_factors.emplace(name, std::numeric_limits<double>::quiet_NaN());
         if (ins.second) { // just inserted, need to be populated
