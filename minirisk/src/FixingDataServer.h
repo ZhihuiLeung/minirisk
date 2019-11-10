@@ -9,7 +9,7 @@ struct FixingDataServer {
 public:
     FixingDataServer(const std::string& filename);
     FixingDataServer();
-    double get(const std::string& name, const Date& t) const;
+    std::pair<double, std::string> get(const std::string& name, const Date& t) const;
     std::pair<double, bool> lookup(const std::string& name, const Date& t) const;
     bool is_empty() const;
 

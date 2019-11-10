@@ -27,16 +27,18 @@ FixingDataServer::FixingDataServer(const std::string& filename) {
     } while (is);
 }
 
-double FixingDataServer::get(const std::string& name, const Date& t) const {
+std::pair<double, std::string> FixingDataServer::get(const std::string& name, const Date& t) const {
+    
     auto iter = fds_data.find(name);
     // MYASSERT(iter != fds_data.end(), "Fixing data not found: " << name);
 
-    if(iter == fds_data.end()) return 0;
+    if(iter == fds_data.end()) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Fixing not found: " + name + "," + t.to_string());
     auto date_iter = iter->second.find(t);
     // MYASSERT(date_iter != iter->second.end(), "Fixing date not found: " << name << " " << t.to_string());
 
-    if(date_iter == iter->second.end()) return 0;
-    return date_iter->second;
+    if(date_iter == iter->second.end()) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Fixing not found: " + name + "," + t.to_string());
+    
+    return std::make_pair(date_iter->second, "");
 }
 
 std::pair<double, bool> FixingDataServer::lookup(const std::string& name, const Date& t) const {

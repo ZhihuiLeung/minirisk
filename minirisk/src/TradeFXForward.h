@@ -30,19 +30,22 @@ struct TradeFXForward : Trade<TradeFXForward> {
 
 private:
     void save_details(my_ofstream& os) const {
-        os << m_base_ccy << m_quote_ccy << m_strike << m_fixing_date << m_settlement_date;
+        os << m_base_ccy << m_quote_ccy << my_dec_to_hex(m_strike) << m_fixing_date << m_settlement_date;
     }
 
     void load_details(my_ifstream& is) {
-        is >> m_base_ccy >> m_quote_ccy >> m_strike >> m_fixing_date >> m_settlement_date;
+        std::string m_strike_temp;
+        is >> m_base_ccy >> m_quote_ccy >> m_strike_temp >> m_fixing_date >> m_settlement_date;
+        
+        m_strike = my_hex_to_dec(m_strike_temp);
     }
 
     void print_details(std::ostream& os) const {
         os << format_label("Strike level") << m_strike << std::endl;
         os << format_label("Base Currency") << m_base_ccy << std::endl;
         os << format_label("Quote Currency") << m_quote_ccy << std::endl;
-        os << format_label("Fixing Date") << m_fixing_date << std::endl;
-        os << format_label("Settlement Date") << m_settlement_date << std::endl;
+        os << format_label("Fixing Date") << m_fixing_date.to_string() << std::endl;
+        os << format_label("Settlement Date") << m_settlement_date.to_string() << std::endl;
     }
 
     std::string m_base_ccy;

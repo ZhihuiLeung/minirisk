@@ -96,12 +96,10 @@ public:
         std::string my_date = std::to_string(get_initial_format_date());
 
         std::string m_y = my_date.substr(0, 4);
-        std::string m_m = my_date.substr(4, 2);
-        std::string m_d = my_date.substr(6, 2);
-        unsigned m = static_cast<unsigned>(std::atoi(m_m.c_str()));
-        unsigned d = static_cast<unsigned>(std::atoi(m_d.c_str()));
+        unsigned m = static_cast<unsigned>(std::atoi(my_date.substr(4, 2).c_str()));
+        unsigned d = static_cast<unsigned>(std::atoi(my_date.substr(6, 2).c_str()));
         return pretty
-            ? m_d + "-" + m_m + "-" + m_y
+            ? std::to_string(d) + "-" + std::to_string(m) + "-" + m_y
             : m_y + padding_dates(m) + padding_dates(d);
     }
 

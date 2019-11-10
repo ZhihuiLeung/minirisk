@@ -14,7 +14,7 @@ void run(const string& portfolio_file, const string& risk_factors_file, const st
     save_portfolio("portfolio.tmp", portfolio);
     portfolio.clear();
     portfolio = load_portfolio("portfolio.tmp");
-
+    
     // display portfolio
     print_portfolio(portfolio);
 
@@ -74,7 +74,6 @@ int main(int argc, const char **argv)
 {
     // parse command line arguments
     
-
     string portfolio, riskfactors;
     string baseccy = "USD";
     string fixing_file_path = "";

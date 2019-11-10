@@ -46,7 +46,7 @@ private:
     void print_details(std::ostream& os) const
     {
         os << format_label("Currency") << m_ccy << std::endl;
-        os << format_label("Delivery Date") << m_delivery_date << std::endl;
+        os << format_label("Delivery Date") << m_delivery_date.to_string() << std::endl;
     }
 
 private:

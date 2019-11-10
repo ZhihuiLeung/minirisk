@@ -24,4 +24,28 @@ string my_date_transform(string date_str)
     return std::to_string(std::stoi(date_str.substr(0, index_one))) + '-' + std::to_string(std::stoi(date_str.substr(index_one+1,index_two))) + '-' + date_str.substr(index_two+1,date_str.size());
 }
 
+double my_hex_to_dec(string hex_str)
+{
+    union { double d; uint64_t u; } tmp;
+
+    std::stringstream ss;
+
+    ss << std::hex << hex_str;
+    ss >> tmp.u;
+
+    return tmp.d;
+}
+
+string my_dec_to_hex(double dec)
+{
+    union { double d; uint64_t u; } tmp;
+    std::stringstream ss;
+    std::string hex_str;
+    
+    tmp.d = dec;
+    ss << std::hex << tmp.u;
+    ss >> hex_str;
+
+    return hex_str;
+}
 }

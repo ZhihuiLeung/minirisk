@@ -31,4 +31,7 @@ inline string fx_forward_name(const string& ccy1, const string& ccy2)
 string format_label(const string& s);
 
 string my_date_transform(string date_str);
+string my_dec_to_hex(double dec);
+double my_hex_to_dec(string hex_str);
+
 } // namespace minirisk

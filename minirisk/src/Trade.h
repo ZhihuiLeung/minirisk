@@ -42,31 +42,18 @@ protected:
 
     virtual void save(my_ofstream& os) const
     {
-        union { double d; uint64_t u; } tmp;
-        std::stringstream ss;
-        std::string temp_s;
-        
-        tmp.d = quantity();
-        ss << std::hex << tmp.u;
-        ss >> temp_s;
-
-        os << id() << temp_s;
+        os << id() << my_dec_to_hex(quantity());
         static_cast<const T*>(this)->save_details(os);
     }
 
     virtual void load(my_ifstream& is)
     {
         // read everything but id
-        union { double d; uint64_t u; } tmp;
-        std::string temp_s;
-        std::stringstream ss;
+        std::string hex_str;
 
-        is >> temp_s;
+        is >> hex_str;
 
-        ss << std::hex << temp_s;
-        ss >> tmp.u;
-
-        m_quantity = tmp.d;
+        m_quantity = my_hex_to_dec(hex_str);
 
         static_cast<T*>(this)->load_details(is);
     }
