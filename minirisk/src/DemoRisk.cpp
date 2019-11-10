@@ -31,6 +31,7 @@ void run(const string& portfolio_file, const string& risk_factors_file, const st
 
     // Price all products. Market objects are automatically constructed on demand,
     // fetching data as needed from the market data server.
+
     {
 
         auto prices = compute_prices(pricers, mkt);
@@ -72,6 +73,8 @@ void usage()
 int main(int argc, const char **argv)
 {
     // parse command line arguments
+    
+
     string portfolio, riskfactors;
     string baseccy = "USD";
     string fixing_file_path = "";
@@ -109,4 +112,5 @@ int main(int argc, const char **argv)
         std::cerr << "Unknown exception occurred\n";
         return -1; // report an error to the caller
     }
+    
 }

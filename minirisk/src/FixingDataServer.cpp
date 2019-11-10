@@ -16,19 +16,26 @@ FixingDataServer::FixingDataServer(const std::string& filename) {
         double value;
         is >> name >> date_str >> value;
         // std::cout << name << " " << value << "\n";
+        if(name == "") break;
+        unsigned year = unsigned(std::atoi(date_str.substr(0,4).c_str()));
+        unsigned month = unsigned(std::atoi(date_str.substr(4,2).c_str()));
+        unsigned day = unsigned(std::atoi(date_str.substr(6,2).c_str()));
+
         fds_data.emplace(name, std::map<Date, double>());
-        auto ins = fds_data[name].emplace(Date(unsigned(std::atoi(date_str.c_str()))), value);
+        auto ins = fds_data[name].emplace(Date(year, month, day), value);
         MYASSERT(ins.second, "Duplicated risk factor: " << name << " " << date_str << " " << value);
     } while (is);
 }
 
 double FixingDataServer::get(const std::string& name, const Date& t) const {
     auto iter = fds_data.find(name);
-    MYASSERT(iter != fds_data.end(), "Fixing data not found: " << name);
+    // MYASSERT(iter != fds_data.end(), "Fixing data not found: " << name);
 
+    if(iter == fds_data.end()) return 0;
     auto date_iter = iter->second.find(t);
-    MYASSERT(date_iter != iter->second.end(), "Fixing date not found: " << name << " " << t.to_string());
+    // MYASSERT(date_iter != iter->second.end(), "Fixing date not found: " << name << " " << t.to_string());
 
+    if(date_iter == iter->second.end()) return 0;
     return date_iter->second;
 }
 
@@ -43,4 +50,8 @@ std::pair<double, bool> FixingDataServer::lookup(const std::string& name, const 
   return std::make_pair(std::numeric_limits<double>::quiet_NaN(), false);
 }
 
+bool FixingDataServer::is_empty() const
+{
+    return(fds_data.size() == 0);
+}
 } // namespace minirisk

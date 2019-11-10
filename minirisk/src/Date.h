@@ -72,6 +72,11 @@ public:
         return (lomo_serial > d.get_serial());
     }
 
+    bool operator>=(const Date& d) const
+    {
+        return (lomo_serial >= d.get_serial());
+    }
+    
     unsigned get_serial() const
     {
         return lomo_serial;

@@ -1,6 +1,7 @@
 #include "Global.h"
 #include "PortfolioUtils.h"
 #include "TradePayment.h"
+#include "TradeFXForward.h"
 
 #include <numeric>
 #include <set>
@@ -96,10 +97,7 @@ std::vector<std::pair<string, portfolio_values_t>> compute_parallel_pv01(const s
                     return std::make_pair(std::numeric_limits<double>::quiet_NaN(), hi.second);
                 }
                 });
-        // std::transform(pv_up.begin(), pv_up.end(), pv_dn.begin(), pv01.back().second.begin()
-        //         , [dr](double hi, double lo) -> double { return (hi - lo) / dr; });
     }
-    
     return pv01;
 }
 
@@ -226,6 +224,8 @@ ptrade_t load_trade(my_ifstream& is)
 
     if (id == TradePayment::m_id)
         p.reset(new TradePayment);
+    else if(id == TradeFXForward::m_id )
+        p.reset(new TradeFXForward);
     else
         THROW("Unknown trade type:" << id);
 
