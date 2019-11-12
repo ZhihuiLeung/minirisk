@@ -21,6 +21,7 @@ std::pair<double, string> PricerForward::price(Market& mkt, const FixingDataServ
     ptr_disc_curve_t disc = mkt.get_discount_curve(m_ir_curve);
     double df = 0;
     double fx_spot = 1;
+    double s_fx_spot = 1;
     double fwd_price = 0;
     // discount factor
     auto df_result = disc->df(m_fwd_settlement_date); // this throws an exception if m_dt<today
@@ -66,9 +67,33 @@ std::pair<double, string> PricerForward::price(Market& mkt, const FixingDataServ
             }
         //  T_1 > T_0
         } else {
-            const auto& res = fds.lookup(fixing_name, m_fwd_fixing_date);
+            // const auto& res = fds.lookup(fixing_name, m_fwd_fixing_date);
 
-            if (res.second) fwd_price = res.first; 
+            // if (res.second) fwd_price = res.first; 
+            if(m_fwd_base_ccy != m_fwd_quote_ccy)
+            {
+                if (m_fwd_base_ccy != "USD")
+                {
+                    ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_base_ccy);
+                    s_fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_quote_ccy);
+                    // fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_base_ccy);
+                } else {
+                    ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_quote_ccy);
+
+                    s_fx_spot = 1 / fx->get_spot(fx_spot_prefix+"USD");
+                }
+            }
+            std::string m_ir_curve_temp = ir_curve_discount_name(m_fwd_base_ccy);
+            ptr_disc_curve_t disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
+            auto df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
+            auto df_one = df_result_temp.first;
+
+            m_ir_curve_temp = ir_curve_discount_name(m_fwd_quote_ccy);
+            disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
+            df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
+            auto df_two = df_result_temp.first;
+
+            fwd_price = s_fx_spot * df_one / df_two;
         }
     }
 
