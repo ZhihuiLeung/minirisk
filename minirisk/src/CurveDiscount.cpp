@@ -39,7 +39,7 @@ double my_tenor_transform(std::string tenor_str)
     
 }
 
-bool judge(const std::pair<int,double> a, const std::pair<int ,double> b) {
+bool judge(const std::pair<int,double> a, const std::pair<int,double> b) {
     return(a.first<b.first);
 }
 
@@ -56,14 +56,8 @@ CurveDiscount::CurveDiscount(Market *mkt, const Date& today, const string& curve
         cur_tenor = my_tenor_transform(iter->first);
         tenor_rate_vec.push_back(std::make_pair(cur_tenor, iter->second));
     }
-    // sort(tenor_rate_vec.begin(),tenor_rate_vec.end(), judge);
-    // for(unsigned i = 0; i < tenor_rate_vec.size(); i++) {
-    //     std::cout << tenor_rate_vec[i].first << std::endl;
-    // }
     sort(tenor_rate_vec.begin(),tenor_rate_vec.end());
-    // for(unsigned i = 0; i < tenor_rate_vec.size(); i++) {
-    //     std::cout << tenor_rate_vec[i].first << std::endl;
-    // }
+
     for(auto iter = tenor_rate_vec.cbegin(); iter != tenor_rate_vec.cend(); iter++)
     {
         rate_mul_tenor_vec.push_back(- (iter->first) * (iter->second));
@@ -77,28 +71,21 @@ std::pair<double, unsigned> CurveDiscount::df(const Date& t) const
     if(t == m_today) return std::make_pair(1, 0);
     double dt = time_frac(m_today, t);
 
-    // unsigned id = unsigned(std::upper_bound(tenor_rate_vec.begin(), tenor_rate_vec.end(), std::make_pair(dt, 0), judge) - tenor_rate_vec.begin());
-
-    unsigned id = 0;
-    while(dt >= tenor_rate_vec[id].first && id < tenor_rate_vec.size()) id++;
-
+    unsigned id = unsigned(std::upper_bound(tenor_rate_vec.begin(), tenor_rate_vec.end(), std::make_pair(dt, 100), judge) - tenor_rate_vec.begin());
     if(id == tenor_rate_vec.size()) return std::make_pair(tenor_rate_vec.back().first * 365, 2);
+
+    while(id > 0 && dt < tenor_rate_vec[id-1].first) id--;
 
     if(id > 0) id -= 1;
 
     double t_i = tenor_rate_vec[id].first;
-
     double t_i_add_one = tenor_rate_vec[id+1].first;
-    
     double remain_tenor = dt - t_i;
 
-    if(remain_tenor > 0)
-    {
+    if(remain_tenor > 0) {
         return std::make_pair(std::exp(rate_mul_tenor_vec[id] - (-rate_mul_tenor_vec[id+1] + rate_mul_tenor_vec[id]) / (t_i_add_one - t_i)* remain_tenor), 0);
-        
     } else if(remain_tenor < 0) {
-        auto result = std::exp(-tenor_rate_vec[id].second * dt);
-        return std::make_pair(result, 0);
+        return std::make_pair(std::exp(-tenor_rate_vec[id].second * dt), 0);
     } else {
         return std::make_pair(std::exp(rate_mul_tenor_vec[id]), 0);
     }
