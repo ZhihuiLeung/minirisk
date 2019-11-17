@@ -38,4 +38,3 @@ typedef std::shared_ptr<ITrade> ptrade_t;
 typedef std::vector<ptrade_t> portfolio_t;
 
 } // namespace minirisk
-

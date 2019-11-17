@@ -15,7 +15,7 @@ public:
 
     double get_spot(const std::string& name) const {
         return (fx_map.find(name)->second);
-        }
+    }
 
 
 private:

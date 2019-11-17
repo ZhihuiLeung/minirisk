@@ -16,6 +16,7 @@ string format_label(const string& s)
     return os.str();
 }
 
+// transform 01-01-2018 to 1-1-2018
 string my_date_transform(string date_str)
 {
     auto index_one = date_str.find('-', 0);
@@ -24,6 +25,7 @@ string my_date_transform(string date_str)
     return std::to_string(std::stoi(date_str.substr(0, index_one))) + '-' + std::to_string(std::stoi(date_str.substr(index_one+1,index_two))) + '-' + date_str.substr(index_two+1,date_str.size());
 }
 
+// transform hex to dec
 double my_hex_to_dec(string hex_str)
 {
     union { double d; uint64_t u; } tmp;
@@ -36,6 +38,7 @@ double my_hex_to_dec(string hex_str)
     return tmp.d;
 }
 
+// transform dec to hex
 string my_dec_to_hex(double dec)
 {
     union { double d; uint64_t u; } tmp;

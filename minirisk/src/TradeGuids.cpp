@@ -9,8 +9,3 @@ const std::string TradePayment::m_name = "Payment";
 const std::string TradeFXForward::m_name = "FX.Forward";
 
 } // namespace minirisk
-
-
-
-
-

@@ -19,6 +19,7 @@ std::pair<double,string> PricerPayment::price(Market& mkt, const FixingDataServe
     auto df_result = disc->df(m_dt); // this throws an exception if m_dt<today
     auto df = df_result.first;
 
+    // df not available
     if(df>1)
     {
         if(df_result.second == 1) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Curve "+m_ir_curve+", DF not available before anchor date "+my_date_transform(mkt.get_today().to_string())+", requested "+my_date_transform(Date(mkt.get_today().get_serial()+unsigned(df)).to_string()));

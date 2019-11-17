@@ -17,6 +17,7 @@ struct DateInitializer : std::array<unsigned, Date::n_years>
 
 const std::array<unsigned, 12> Date::days_in_month = { {31,28,31,30,31,30,31,31,30,31,30,31} };
 const std::array<unsigned, 12> Date::days_ytd{ {0,31,59,90,120,151,181,212,243,273,304,334} };
+// the day number for each month in leap year
 const std::array<unsigned, 12> Date::leap_days_ytd{ {0,31,60,91,121,152,182,213,244,274,305,335} };
 const std::array<unsigned, Date::n_years> Date::days_epoch(static_cast<const std::array<unsigned, Date::n_years>&>(DateInitializer()));
 
@@ -50,6 +51,7 @@ unsigned Date::day_of_year(unsigned month, unsigned day, bool lomo_is_leap) cons
     return days_ytd[month - 1] + ((month > 2 && lomo_is_leap) ? 1 : 0) + (day - 1);
 }
 
+// generate the initial formate date, ex. 20190905
 unsigned Date::get_initial_format_date() const {
 
     unsigned year_index = unsigned(std::upper_bound(days_epoch.begin(), days_epoch.end(), Date::lomo_serial) - days_epoch.begin()) - 1;

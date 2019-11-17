@@ -17,6 +17,8 @@ FixingDataServer::FixingDataServer(const std::string& filename) {
         is >> name >> date_str >> value;
         // std::cout << name << " " << value << "\n";
         if(name == "") break;
+
+        // read the date format of YYYYMMDD from fixing.txt
         unsigned year = unsigned(std::atoi(date_str.substr(0,4).c_str()));
         unsigned month = unsigned(std::atoi(date_str.substr(4,2).c_str()));
         unsigned day = unsigned(std::atoi(date_str.substr(6,2).c_str()));
@@ -30,12 +32,12 @@ FixingDataServer::FixingDataServer(const std::string& filename) {
 std::pair<double, std::string> FixingDataServer::get(const std::string& name, const Date& t) const {
     
     auto iter = fds_data.find(name);
-    // MYASSERT(iter != fds_data.end(), "Fixing data not found: " << name);
 
+    // name not found
     if(iter == fds_data.end()) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Fixing not found: " + name + "," + t.to_string());
     auto date_iter = iter->second.find(t);
-    // MYASSERT(date_iter != iter->second.end(), "Fixing date not found: " << name << " " << t.to_string());
 
+    // date not found
     if(date_iter == iter->second.end()) return std::make_pair(std::numeric_limits<double>::quiet_NaN(), "Fixing not found: " + name + "," + t.to_string());
     
     return std::make_pair(date_iter->second, "");

@@ -50,4 +50,3 @@ struct ICurveFXSpot : ICurve
 };
 
 } // namespace minirisk
-

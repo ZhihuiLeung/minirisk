@@ -39,4 +39,3 @@ void print_price_vector(const string& name, const portfolio_values_t& values);
 
 
 } // namespace minirisk
-

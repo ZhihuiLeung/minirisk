@@ -7,13 +7,6 @@
 
 namespace minirisk {
 
-
-std::string get_fx_name_two(std::string name)
-{
-    auto pos = name.rfind('.');
-    return name.substr(pos+1, name.size());
-}
-
 // transforms FX.SPOT.EUR.USD into FX.SPOT.EUR
 string mds_spot_name(const string& name, const string& baseccy)
 {
@@ -37,6 +30,7 @@ MarketDataServer::MarketDataServer(const string& filename)
     } while (is);
 }
 
+// get risk factors
 std::map<string, double> MarketDataServer::get(const string& objtype, const string& name) const
 {
     std::map<string, double> result_map;
@@ -74,6 +68,7 @@ std::pair<double, bool> MarketDataServer::lookup(const string& name) const
             : std::make_pair(std::numeric_limits<double>::quiet_NaN(), false);
 }
 
+// return the name of risk factors whose name matched the RegExp
 std::vector<std::string> MarketDataServer::match(const std::string& expr) const
 {
     std::regex r(expr);

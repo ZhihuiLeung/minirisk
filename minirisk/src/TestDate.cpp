@@ -7,6 +7,7 @@ std::string my_transform(unsigned year, unsigned month, unsigned day)
 {
     return std::to_string((year*100+month)*100+day);
 }
+
 bool my_calendar_format_validation(unsigned year, unsigned month, unsigned day)
 {
     minirisk::Date my_date(year, month, day);
@@ -31,6 +32,8 @@ int get_cur_serial(unsigned year, unsigned month, unsigned day, int lag_serial)
     MYASSERT(my_serial_validation(cur_serial, lag_serial), my_transform(year, month, day));
     return cur_serial;
 }
+
+// generate 1000 invalidation date.
 void test1()
 {
     unsigned int seed = (unsigned int)time(NULL);
@@ -57,6 +60,8 @@ void test1()
         }
     }
 }
+
+// date format
 void test2()
 {
     const std::array<unsigned, 12> days_in_month = { {31,28,31,30,31,30,31,31,30,31,30,31} };
@@ -75,6 +80,7 @@ void test2()
     std::cout << "test 2 passed!" << std::endl;
 }
 
+// calculate the difference of continuous serial
 void test3()
 {
     const std::array<unsigned, 12> days_in_month = { {31,28,31,30,31,30,31,31,30,31,30,31} };

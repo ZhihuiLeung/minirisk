@@ -27,8 +27,3 @@ private:
 string mds_spot_name(const string& name, const string& baseccy);
 
 } // namespace minirisk
-
-
-
-
-

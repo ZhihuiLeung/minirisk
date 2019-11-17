@@ -42,10 +42,13 @@ const ptr_fx_forward_curve_t Market::get_fx_fwd_curve(const string& name) {
 std::map<string, double> Market::from_mds(const string& objtype, const string& name)
 {
     std::map<string, double> result_map;
+
+    // when the MarketDataServer is unconnected, we should the the data from factors from the local database
     if(m_mds == NULL)
     {
         Market::vec_risk_factor_t temp;
 
+        // get IR
         if(objtype == "yield curve")
         {
             auto pos = name.find('.', 0);
@@ -55,6 +58,7 @@ std::map<string, double> Market::from_mds(const string& objtype, const string& n
             {
                 result_map[iter->first] = iter->second;
             }
+        // get FX
         } else if(objtype == "fx spot")
         {
             temp = get_risk_factors("FX.SPOT.*");
@@ -64,6 +68,7 @@ std::map<string, double> Market::from_mds(const string& objtype, const string& n
                 result_map.emplace(iter->first, iter->second);
             }
         }
+    // get data from the MarketDataServer when it is connected.
     } else {
         result_map = m_mds->get(objtype, name);
 
@@ -79,16 +84,20 @@ std::map<string, double> Market::from_mds(const string& objtype, const string& n
     return result_map; 
 }
 
+// get IR
 const std::map<string, double> Market::get_yield(const string& ccyname)
 {
     string name(ir_rate_prefix + ccyname);
     return from_mds("yield curve", name);
 };
 
+// to calculate the different spot for a currency, such as EUR~USD, EUR~GBP, EUR~JPY.
+// then return a map whose key is currency name and value is the spot.
 const std::map<string, double> Market::generate_different_fx_spot(const string& name)
 {
     std::map<string, double> result_map;
 
+    // get data from local database
     if(m_mds == NULL) {
         auto iter = get_risk_factors(name);
         double cur_fx = iter.cbegin()->second;
@@ -104,8 +113,8 @@ const std::map<string, double> Market::generate_different_fx_spot(const string& 
                 result_map.emplace(cur_risk_factor_iter->first.substr(0, cur_risk_factor_iter->first.size()-3)+"USD", cur_fx);
             }
         }
+    // get data from MarketDataServer
     } else {
-
         auto temp = m_mds->get("fx spot", name);
         double cur_fx = temp[name];
 
@@ -135,6 +144,7 @@ const std::map<string, double> Market::get_fx_spot(const string& name)
     return generate_different_fx_spot(name);
 }
 
+// set the risk_factor to a new value.
 void Market::set_risk_factors(const vec_risk_factor_t& risk_factors)
 {
     clear();
@@ -145,6 +155,8 @@ void Market::set_risk_factors(const vec_risk_factor_t& risk_factors)
     }
 }
 
+
+// get factors whose name matched the RegExp
 Market::vec_risk_factor_t Market::get_risk_factors(const std::string& expr) const
 {
     vec_risk_factor_t result;
@@ -154,6 +166,7 @@ Market::vec_risk_factor_t Market::get_risk_factors(const std::string& expr) cons
             result.push_back(d);
     return result;
 }
+// get base currency
 const std::string Market::get_baseccy()
 {
     return m_baseccy;
