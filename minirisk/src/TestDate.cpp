@@ -33,14 +33,30 @@ int get_cur_serial(unsigned year, unsigned month, unsigned day, int lag_serial)
 }
 void test1()
 {
-    // int my_seed = std::time(NULL);
+    unsigned int seed = (unsigned int)time(NULL);
+    srandom((unsigned int)time(NULL));
+    std::cout << "The random seed is " << seed << std::endl;
 
-    // std::cout << "Current tested seed: " << my_seed << std::endl;
-    
+    int my_count = 0;
+    int error_num = 1000;
 
-    // std::cout << "test 1 passed!" << std::endl;
+    while(my_count < error_num) {
+        unsigned y, m, d;
+
+        y = rand() % 600 + 1900;
+        m = rand() % 24 + 1;
+        d = rand() % 60 + 1;
+
+        try {
+            minirisk::Date a(y, m, d);
+            std::cout << "SUCCESS" << std::endl;
+        }
+        catch (std::exception& e) {
+            std::cout << "Error ID: "  << my_count << "\t" << e.what() << std::endl;
+            my_count++;
+        }
+    }
 }
-
 void test2()
 {
     const std::array<unsigned, 12> days_in_month = { {31,28,31,30,31,30,31,31,30,31,30,31} };
@@ -87,4 +103,3 @@ int main()
     test3();
     return 0;
 }
-
