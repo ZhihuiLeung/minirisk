@@ -55,46 +55,44 @@ std::pair<double, string> PricerForward::price(Market& mkt, const FixingDataServ
     if(!(fds.is_empty()))
     {
         const auto fixing_name = fx_spot_name(m_fwd_base_ccy, m_fwd_quote_ccy);
-        // T_1 <= T_0 <= T_2
-        if(mkt.get_today() > m_fwd_fixing_date)
+        // T_1 < T_0 <= T_2
+        if(mkt.get_today() >= m_fwd_fixing_date)
         {
             auto temp_pair = fds.get(fixing_name, m_fwd_fixing_date);
             if(temp_pair.second == "")
             {
                 fwd_price = temp_pair.first;
-            } else {
+            } else if(mkt.get_today() > m_fwd_fixing_date) {
                 return std::make_pair(std::numeric_limits<double>::quiet_NaN(), temp_pair.second);
             }
-        //  T_1 > T_0
-        } else {
-            // const auto& res = fds.lookup(fixing_name, m_fwd_fixing_date);
-
-            // if (res.second) fwd_price = res.first; 
-            if(m_fwd_base_ccy != m_fwd_quote_ccy)
-            {
-                if (m_fwd_base_ccy != "USD")
-                {
-                    ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_base_ccy);
-                    s_fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_quote_ccy);
-                    // fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_base_ccy);
-                } else {
-                    ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_quote_ccy);
-
-                    s_fx_spot = 1 / fx->get_spot(fx_spot_prefix+"USD");
-                }
-            }
-            std::string m_ir_curve_temp = ir_curve_discount_name(m_fwd_base_ccy);
-            ptr_disc_curve_t disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
-            auto df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
-            auto df_one = df_result_temp.first;
-
-            m_ir_curve_temp = ir_curve_discount_name(m_fwd_quote_ccy);
-            disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
-            df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
-            auto df_two = df_result_temp.first;
-
-            fwd_price = s_fx_spot * df_one / df_two;
         }
+    }
+        //  T_1 >= T_0
+    if(fwd_price == 0) {
+        if(m_fwd_base_ccy != m_fwd_quote_ccy)
+        {
+            if (m_fwd_base_ccy != "USD")
+            {
+                ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_base_ccy);
+                s_fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_quote_ccy);
+                // fx_spot = fx->get_spot(fx_spot_prefix+m_fwd_base_ccy);
+            } else {
+                ptr_fx_spot_curve_t fx = mkt.get_fx_spot_curve(fx_spot_prefix+m_fwd_quote_ccy);
+
+                s_fx_spot = 1 / fx->get_spot(fx_spot_prefix+"USD");
+            }
+        }
+        std::string m_ir_curve_temp = ir_curve_discount_name(m_fwd_base_ccy);
+        ptr_disc_curve_t disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
+        auto df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
+        auto df_one = df_result_temp.first;
+
+        m_ir_curve_temp = ir_curve_discount_name(m_fwd_quote_ccy);
+        disc_temp = mkt.get_discount_curve(m_ir_curve_temp);
+        df_result_temp = disc_temp->df(m_fwd_fixing_date); // this throws an exception if m_dt<today
+        auto df_two = df_result_temp.first;
+
+        fwd_price = s_fx_spot * df_one / df_two;
     }
 
     if(fwd_price == 0)

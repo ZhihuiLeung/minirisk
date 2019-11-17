@@ -56,8 +56,14 @@ CurveDiscount::CurveDiscount(Market *mkt, const Date& today, const string& curve
         cur_tenor = my_tenor_transform(iter->first);
         tenor_rate_vec.push_back(std::make_pair(cur_tenor, iter->second));
     }
-    sort(tenor_rate_vec.begin(),tenor_rate_vec.end(), judge);
-    
+    // sort(tenor_rate_vec.begin(),tenor_rate_vec.end(), judge);
+    // for(unsigned i = 0; i < tenor_rate_vec.size(); i++) {
+    //     std::cout << tenor_rate_vec[i].first << std::endl;
+    // }
+    sort(tenor_rate_vec.begin(),tenor_rate_vec.end());
+    // for(unsigned i = 0; i < tenor_rate_vec.size(); i++) {
+    //     std::cout << tenor_rate_vec[i].first << std::endl;
+    // }
     for(auto iter = tenor_rate_vec.cbegin(); iter != tenor_rate_vec.cend(); iter++)
     {
         rate_mul_tenor_vec.push_back(- (iter->first) * (iter->second));
@@ -74,9 +80,9 @@ std::pair<double, unsigned> CurveDiscount::df(const Date& t) const
     // unsigned id = unsigned(std::upper_bound(tenor_rate_vec.begin(), tenor_rate_vec.end(), std::make_pair(dt, 0), judge) - tenor_rate_vec.begin());
 
     unsigned id = 0;
-    while(dt >= tenor_rate_vec[id].first && id <= tenor_rate_vec.size()) id++;
+    while(dt >= tenor_rate_vec[id].first && id < tenor_rate_vec.size()) id++;
 
-    if(id == tenor_rate_vec.size()+1) return std::make_pair(tenor_rate_vec.back().first * 365, 2);
+    if(id == tenor_rate_vec.size()) return std::make_pair(tenor_rate_vec.back().first * 365, 2);
 
     if(id > 0) id -= 1;
 
@@ -91,7 +97,6 @@ std::pair<double, unsigned> CurveDiscount::df(const Date& t) const
         return std::make_pair(std::exp(rate_mul_tenor_vec[id] - (-rate_mul_tenor_vec[id+1] + rate_mul_tenor_vec[id]) / (t_i_add_one - t_i)* remain_tenor), 0);
         
     } else if(remain_tenor < 0) {
-        // auto result = std::exp(rate_mul_tenor_vec[id] * dt / t_i);
         auto result = std::exp(-tenor_rate_vec[id].second * dt);
         return std::make_pair(result, 0);
     } else {

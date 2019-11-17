@@ -42,7 +42,6 @@ std::pair<double,string> PricerPayment::price(Market& mkt, const FixingDataServe
     }
     auto result = m_amt * df * fx_spot;
     return std::make_pair(result, "");
-    // return std::make_pair(m_amt * df * fx_spot, "");
 }
 
 } // namespace minirisk

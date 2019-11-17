@@ -184,12 +184,12 @@ std::vector<std::pair<string, portfolio_values_t>> compute_fx_delta(const std::v
         fx_delta.push_back(std::make_pair(d.first, portfolio_values_t(pricers.size())));
 
         // bump down and price
-        bumped[0].second = d.second - bump_size;
+        bumped[0].second = d.second * (1 - bump_size);
         tmpmkt.set_risk_factors(bumped);
         pv_dn = compute_prices(pricers, tmpmkt);
 
         // bump up and price
-        bumped[0].second = d.second + bump_size; // bump up
+        bumped[0].second = d.second * (1 + bump_size); // bump up
         tmpmkt.set_risk_factors(bumped);
         pv_up = compute_prices(pricers, tmpmkt);
 
@@ -199,7 +199,7 @@ std::vector<std::pair<string, portfolio_values_t>> compute_fx_delta(const std::v
         tmpmkt.set_risk_factors(bumped);
 
         // compute estimator of the derivative via central finite differences
-        double dr = 2.0 * bump_size;
+        double dr = 2.0 * bump_size * d.second;
         std::transform(pv_up.begin(), pv_up.end(), pv_dn.begin(), fx_delta.back().second.begin()
             , [dr](std::pair<double, string> hi, std::pair<double, string> lo) -> std::pair<double, string> {
                 if(hi.second == "" && lo.second == "")
