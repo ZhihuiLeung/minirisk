@@ -97,7 +97,7 @@ int main(int argc, const char **argv)
         usage();
 
     try {
-        fixing_file_path = "./data/" + fixing_file_path;
+        // fixing_file_path = "./data/" + fixing_file_path;
         run(portfolio, riskfactors, baseccy, fixing_file_path);
         return 0;  // report success to the caller
     }
